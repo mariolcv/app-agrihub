@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores\build\windows\x64\CMakeFiles\d3a5dc216931c5c0573d052f978ba9a2\flutter_windows.dll.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores\build\windows\x64\CMakeFiles\4d5adfe22838be7c592d8f85075201a1\flutter_assemble.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores\windows\flutter\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores\build\windows\x64\flutter\CMakeFiles\flutter_assemble" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{67B33D9A-8EBC-37EA-A5CC-D1D69F494C69}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

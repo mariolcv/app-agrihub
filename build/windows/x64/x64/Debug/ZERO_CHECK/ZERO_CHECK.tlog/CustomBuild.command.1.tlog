@@ -1,0 +1,10 @@
+^C:\PROYECTOS FRUTAS CALANDA\SW_GESTION_PARCELAS\APP\AGRIHUB-MOBILE-AGRICULTORES\BUILD\WINDOWS\X64\CMAKEFILES\47DB9D4C6276D250B60A8E8F39C7CE8B\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" "-SC:/proyectos frutas calanda/sw_gestion_parcelas/app/agrihub-mobile-agricultores/windows" "-BC:/proyectos frutas calanda/sw_gestion_parcelas/app/agrihub-mobile-agricultores/build/windows/x64" --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "C:/proyectos frutas calanda/sw_gestion_parcelas/app/agrihub-mobile-agricultores/build/windows/x64/gest_parcelas.sln"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

@@ -1,0 +1,10 @@
+^C:\PROYECTOS FRUTAS CALANDA\SW_GESTION_PARCELAS\APP\AGRIHUB-MOBILE-AGRICULTORES\BUILD\WINDOWS\X64\CMAKEFILES\47DB9D4C6276D250B60A8E8F39C7CE8B\INSTALL_FORCE.RULE
+setlocal
+cd .
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

@@ -1,0 +1,28 @@
+^C:\PROYECTOS FRUTAS CALANDA\SW_GESTION_PARCELAS\APP\AGRIHUB-MOBILE-AGRICULTORES\BUILD\WINDOWS\X64\CMAKEFILES\D3A5DC216931C5C0573D052F978BA9A2\FLUTTER_WINDOWS.DLL.RULE
+setlocal
+"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E env FLUTTER_ROOT=C:\Users\mario\OneDrive\Escritorio\flutter\flutter_windows_3.24.5-stable\flutter "PROJECT_DIR=C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores" FLUTTER_ROOT=C:\Users\mario\OneDrive\Escritorio\flutter\flutter_windows_3.24.5-stable\flutter "FLUTTER_EPHEMERAL_DIR=C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores\windows\flutter\ephemeral" "PROJECT_DIR=C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores" "FLUTTER_TARGET=C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores\lib\main.dart" DART_OBFUSCATION=false TRACK_WIDGET_CREATION=true TREE_SHAKE_ICONS=false "PACKAGE_CONFIG=C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores\.dart_tool\package_config.json" C:/Users/mario/OneDrive/Escritorio/flutter/flutter_windows_3.24.5-stable/flutter/packages/flutter_tools/bin/tool_backend.bat windows-x64 Debug
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\PROYECTOS FRUTAS CALANDA\SW_GESTION_PARCELAS\APP\AGRIHUB-MOBILE-AGRICULTORES\BUILD\WINDOWS\X64\CMAKEFILES\4D5ADFE22838BE7C592D8F85075201A1\FLUTTER_ASSEMBLE.RULE
+setlocal
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\PROYECTOS FRUTAS CALANDA\SW_GESTION_PARCELAS\APP\AGRIHUB-MOBILE-AGRICULTORES\WINDOWS\FLUTTER\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" "-SC:/proyectos frutas calanda/sw_gestion_parcelas/app/agrihub-mobile-agricultores/windows" "-BC:/proyectos frutas calanda/sw_gestion_parcelas/app/agrihub-mobile-agricultores/build/windows/x64" --check-stamp-file "C:/proyectos frutas calanda/sw_gestion_parcelas/app/agrihub-mobile-agricultores/build/windows/x64/flutter/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

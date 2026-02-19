@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores\windows\runner\flutter_window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores\windows\runner\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores\windows\runner\utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores\windows\runner\win32_window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores\windows\flutter\generated_plugin_registrant.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores\windows\runner\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores\windows\runner\Runner.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{DD72AFAA-31A0-308C-BE91-FF8416B925CA}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,12 @@
+C:/proyectos frutas calanda/sw_gestion_parcelas/app/agrihub-mobile-agricultores/build/windows/x64/runner/Debug/data/icudtl.dat
+C:/proyectos frutas calanda/sw_gestion_parcelas/app/agrihub-mobile-agricultores/build/windows/x64/runner/Debug/flutter_windows.dll
+C:/proyectos frutas calanda/sw_gestion_parcelas/app/agrihub-mobile-agricultores/build/windows/x64/runner/Debug/data/flutter_assets/AssetManifest.bin
+C:/proyectos frutas calanda/sw_gestion_parcelas/app/agrihub-mobile-agricultores/build/windows/x64/runner/Debug/data/flutter_assets/AssetManifest.bin.json
+C:/proyectos frutas calanda/sw_gestion_parcelas/app/agrihub-mobile-agricultores/build/windows/x64/runner/Debug/data/flutter_assets/AssetManifest.json
+C:/proyectos frutas calanda/sw_gestion_parcelas/app/agrihub-mobile-agricultores/build/windows/x64/runner/Debug/data/flutter_assets/FontManifest.json
+C:/proyectos frutas calanda/sw_gestion_parcelas/app/agrihub-mobile-agricultores/build/windows/x64/runner/Debug/data/flutter_assets/fonts/MaterialIcons-Regular.otf
+C:/proyectos frutas calanda/sw_gestion_parcelas/app/agrihub-mobile-agricultores/build/windows/x64/runner/Debug/data/flutter_assets/kernel_blob.bin
+C:/proyectos frutas calanda/sw_gestion_parcelas/app/agrihub-mobile-agricultores/build/windows/x64/runner/Debug/data/flutter_assets/NOTICES
+C:/proyectos frutas calanda/sw_gestion_parcelas/app/agrihub-mobile-agricultores/build/windows/x64/runner/Debug/data/flutter_assets/NOTICES.Z
+C:/proyectos frutas calanda/sw_gestion_parcelas/app/agrihub-mobile-agricultores/build/windows/x64/runner/Debug/data/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf
+C:/proyectos frutas calanda/sw_gestion_parcelas/app/agrihub-mobile-agricultores/build/windows/x64/runner/Debug/data/flutter_assets/shaders/ink_sparkle.frag

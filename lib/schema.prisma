@@ -1,0 +1,321 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model empleados {
+  id              Int               @id @default(autoincrement())
+  nombre          String            @db.VarChar(50)
+  foto            String?           @db.VarChar(50)
+  cargo           String?           @db.VarChar(50)
+  cargo2          String?           @db.VarChar(50)
+  visible         Boolean?
+  gasto_empleados gasto_empleados[]
+  nominas         nominas[]
+  plagas          plagas[]
+  tareas          tareas[]
+  usuarios        usuarios[]
+}
+
+model gasto_empleados {
+  id             Int        @id @default(autoincrement())
+  id_empleado    Int?
+  tarea_id       Float?     @db.Float
+  fecha          DateTime?  @db.Date
+  horas          Float?     @db.Float
+  coste_por_hora Float      @default(0) @db.Float
+  descripcion    String?    @db.Text
+  empleados      empleados? @relation(fields: [id_empleado], references: [id], onDelete: Cascade, map: "fk_gasto_empleados_empleados")
+  tareas         tareas?    @relation(fields: [tarea_id], references: [id], onDelete: Cascade, map: "fk_gasto_empleados_tareas")
+
+  @@index([id_empleado], map: "fk_gasto_empleados_empleados")
+  @@index([tarea_id], map: "fk_gasto_empleados_tareas")
+}
+
+model gasto_recursos {
+  id                Int              @id @default(autoincrement())
+  id_recurso        Int
+  id_tarea          Float?           @db.Float
+  fecha             DateTime?        @db.Date
+  consumo           Float?           @db.Float
+  id_precio_recurso Int?
+  id_gasto_vehiculo Int?
+  recursos          recursos         @relation(fields: [id_recurso], references: [id], onDelete: Cascade, map: "fk_gasto_recursos_recursos")
+  tareas            tareas?          @relation(fields: [id_tarea], references: [id], onDelete: Cascade, map: "fk_gasto_recursos_tareas")
+  gasto_vehiculos   gasto_vehiculos? @relation(fields: [id_gasto_vehiculo], references: [id], onUpdate: NoAction, map: "fk_gr_gv")
+  precio_recurso    precio_recurso?  @relation(fields: [id_precio_recurso], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_precio_exacto_recurso")
+
+  @@index([id_recurso], map: "fk_gasto_recursos_recursos")
+  @@index([id_tarea], map: "fk_gasto_recursos_tareas")
+  @@index([id_gasto_vehiculo], map: "fk_gr_gv")
+  @@index([id_precio_recurso], map: "fk_precio_exacto_recurso")
+}
+
+model gasto_vehiculos {
+  id                  Int                 @id @default(autoincrement())
+  matricula           String              @db.VarChar(10)
+  id_tarea            Float               @db.Float
+  id_tarifa_vehiculo  Int?
+  id_accesorio        Int?
+  id_tarifa_accesorio Int?
+  fecha               DateTime?           @db.DateTime(0)
+  horas_uso           Float?              @default(0) @db.Float
+  num_viajes          Int?                @default(0)
+  gasto_recursos      gasto_recursos[]
+  tareas              tareas              @relation(fields: [id_tarea], references: [id], onDelete: Cascade, map: "fk_gasto_vehiculos_tareas")
+  vehiculos           vehiculos           @relation(fields: [matricula], references: [matricula], onDelete: Cascade, map: "fk_gasto_vehiculos_vehiculos")
+  accesorio_vehiculo  accesorio_vehiculo? @relation(fields: [id_accesorio], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_gv_accesorio")
+  tarifa_vehiculo     tarifa_vehiculo?    @relation(fields: [id_tarifa_vehiculo], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_gv_tarifa")
+  tarifa_accesorio    tarifa_accesorio?   @relation(fields: [id_tarifa_accesorio], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_gv_tarifa_accesorio")
+
+  @@index([id_tarea], map: "fk_gasto_vehiculos_tareas")
+  @@index([matricula], map: "fk_gasto_vehiculos_vehiculos")
+  @@index([id_accesorio], map: "fk_gv_accesorio")
+  @@index([id_tarifa_vehiculo], map: "fk_gv_tarifa")
+  @@index([id_tarifa_accesorio], map: "fk_gv_tarifa_accesorio")
+}
+
+model parcelas {
+  id                   Int               @id @default(autoincrement())
+  propietario          String?           @db.VarChar(20)
+  finca                String            @db.VarChar(50)
+  paraje               String?           @db.VarChar(50)
+  poligono             Int?
+  num_parcela          String?           @db.VarChar(20)
+  superficie           Float?            @db.Float
+  num_arboles          Int?
+  variedad             String?           @db.VarChar(50)
+  ano_plantacion       String?           @db.VarChar(10)
+  situacion_especial   String?           @db.VarChar(50)
+  fruto                String?           @db.VarChar(50)
+  distancia_almacen_km Float?            @db.Float
+  plagas               plagas[]
+  tareas_parcelas      tareas_parcelas[]
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model posibles_cargos_empleado {
+  id                     Int     @id @default(autoincrement())
+  cargo                  String? @db.VarChar(50)
+  coste_default_por_hora Float?  @default(0) @db.Float
+}
+
+model posibles_tareas {
+  nombre             String               @id @db.VarChar(50)
+  accesorio_vehiculo accesorio_vehiculo[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model recursos {
+  id                                                       Int              @id @default(autoincrement())
+  tipo_tarea                                               String?          @db.VarChar(50)
+  nombre                                                   String?          @db.VarChar(50)
+  foto                                                     String?          @db.VarChar(50)
+  unidad_consumo                                           String?          @db.VarChar(20)
+  visible                                                  Boolean?         @default(true)
+  id_precio_actual                                         Int?
+  gasto_recursos                                           gasto_recursos[]
+  materia_activa                                           materia_activa[]
+  precio_recurso                                           precio_recurso[]
+  precio_recurso_recursos_id_precio_actualToprecio_recurso precio_recurso?  @relation("recursos_id_precio_actualToprecio_recurso", fields: [id_precio_actual], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_recursos_precio_actual")
+
+  @@index([id_precio_actual], map: "fk_recursos_precio_actual")
+}
+
+model refresh_token {
+  id        Int      @id @default(autoincrement())
+  jti       String   @unique(map: "jti") @db.VarChar(255)
+  userId    Int
+  expiresAt DateTime @db.DateTime(0)
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now()) @db.DateTime(0)
+  usuarios  usuarios @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_refresh_token_user")
+
+  @@index([userId], map: "fk_refresh_token_user")
+}
+
+model tareas {
+  id                      Float             @id @db.Float
+  tipo_tarea              String?           @db.VarChar(50)
+  fecha_inicio            DateTime?         @db.Date
+  fecha_final             DateTime?         @db.Date
+  id_empleado_responsable Int?
+  completada              Boolean?
+  notas                   String?           @db.VarChar(200)
+  coste_total             Float?            @default(0) @db.Float
+  gasto_empleados         gasto_empleados[]
+  gasto_recursos          gasto_recursos[]
+  gasto_vehiculos         gasto_vehiculos[]
+  empleados               empleados?        @relation(fields: [id_empleado_responsable], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_tareas_empleado_responsable")
+  tareas_parcelas         tareas_parcelas[]
+
+  @@index([id_empleado_responsable], map: "fk_tareas_empleado_responsable")
+}
+
+model usuarios {
+  id              Int             @id @default(autoincrement())
+  username        String          @unique(map: "username") @db.VarChar(50)
+  password_hash   String          @db.VarChar(255)
+  rol             String          @db.VarChar(50)
+  empleado_id     Int?
+  email           String?         @unique(map: "email") @db.VarChar(50)
+  first_time_code Int?
+  notifications   notifications[]
+  refresh_token   refresh_token[]
+  empleados       empleados?      @relation(fields: [empleado_id], references: [id], onDelete: Cascade, map: "fk_usuarios_empleados")
+
+  @@index([empleado_id], map: "fk_usuarios_empleados")
+}
+
+model vehiculos {
+  matricula       String                 @id @db.VarChar(10)
+  nombre          String?                @db.VarChar(50)
+  foto            String?                @db.VarChar(50)
+  tipo            vehiculos_tipo?
+  marca           String?                @db.VarChar(50)
+  modelo          String?                @db.VarChar(50)
+  combustible     vehiculos_combustible?
+  gasto_vehiculos gasto_vehiculos[]
+  tarifa_vehiculo tarifa_vehiculo[]
+}
+
+model plagas {
+  id              Int              @id @default(autoincrement())
+  nombre          String           @db.VarChar(100)
+  descripcion     String?          @db.Text
+  fecha_detectada DateTime         @db.Date
+  severidad       plagas_severidad @default(baja)
+  id_parcela      Int
+  id_empleado     Int?
+  empleados       empleados?       @relation(fields: [id_empleado], references: [id], map: "fk_plaga_empleado")
+  parcelas        parcelas         @relation(fields: [id_parcela], references: [id], onDelete: Cascade, map: "fk_plaga_parcela")
+
+  @@index([id_empleado], map: "fk_plaga_empleado")
+  @@index([id_parcela], map: "fk_plaga_parcela")
+}
+
+model accesorio_vehiculo {
+  id               Int                @id @default(autoincrement())
+  nombre           String             @db.VarChar(100)
+  tipo             String?            @db.VarChar(60)
+  activo           Boolean            @default(true)
+  posibles_tareas  posibles_tareas?   @relation(fields: [tipo], references: [nombre], onDelete: NoAction, map: "fk_nombre_tareas")
+  gasto_vehiculos  gasto_vehiculos[]
+  tarifa_accesorio tarifa_accesorio[]
+
+  @@index([tipo], map: "fk_nombre_tareas")
+}
+
+model precio_recurso {
+  id                                                 Int              @id @default(autoincrement())
+  id_recurso                                         Int
+  precio_unitario                                    Float            @db.Float
+  fecha                                              DateTime?        @db.Date
+  gasto_recursos                                     gasto_recursos[]
+  recursos                                           recursos         @relation(fields: [id_recurso], references: [id], onDelete: Cascade, map: "fk_precio_recurso")
+  recursos_recursos_id_precio_actualToprecio_recurso recursos[]       @relation("recursos_id_precio_actualToprecio_recurso")
+
+  @@index([id_recurso], map: "fk_precio_recurso")
+}
+
+model tarifa_accesorio {
+  id                 Int                @id @default(autoincrement())
+  id_accesorio       Int
+  fecha_inicio       DateTime           @db.Date
+  fecha_fin          DateTime?          @db.Date
+  coste_hora         Float?             @default(0) @db.Float
+  factor_consumo     Float?             @default(1) @db.Float
+  gasto_vehiculos    gasto_vehiculos[]
+  accesorio_vehiculo accesorio_vehiculo @relation(fields: [id_accesorio], references: [id], onDelete: Cascade, map: "fk_ta_accesorio")
+
+  @@index([id_accesorio], map: "fk_ta_accesorio")
+}
+
+model tarifa_vehiculo {
+  id                 Int               @id @default(autoincrement())
+  matricula_vehiculo String            @db.VarChar(10)
+  fecha_inicio       DateTime          @db.Date
+  fecha_fin          DateTime?         @db.Date
+  L_hora             Float?            @default(0) @db.Float
+  L_km               Float?            @default(0) @db.Float
+  gasto_vehiculos    gasto_vehiculos[]
+  vehiculos          vehiculos         @relation(fields: [matricula_vehiculo], references: [matricula], onDelete: Cascade, map: "fk_tv_vehiculo")
+
+  @@index([matricula_vehiculo], map: "fk_tv_vehiculo")
+}
+
+model tareas_parcelas {
+  id_tarea   Float    @db.Float
+  id_parcela Int
+  peso       Float    @default(1) @db.Float
+  parcelas   parcelas @relation(fields: [id_parcela], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_tp_parcela")
+  tareas     tareas   @relation(fields: [id_tarea], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_tp_tarea")
+
+  @@id([id_tarea, id_parcela])
+  @@index([id_parcela], map: "fk_tp_parcela")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model nominas {
+  id                   Int       @id @default(autoincrement())
+  id_empleado          Int
+  anio                 Int
+  mes                  Int       @db.TinyInt
+  salario_bruto        Float     @db.Float
+  horas_trabajadas     Float     @db.Float
+  coste_hora_calculado Float?    @db.Float
+  fecha_registro       DateTime  @default(now()) @db.Timestamp(0)
+  empleados            empleados @relation(fields: [id_empleado], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_nomina_empleado")
+
+  @@unique([id_empleado, anio, mes], map: "uq_nomina_empleado_anio_mes")
+  @@index([id_empleado, anio, mes], map: "idx_nominas_empleado_mes_anio")
+}
+
+model materia_activa {
+  id               Int       @id @default(autoincrement())
+  id_producto      Int?
+  kg_ma_por_unidad Float?    @db.Float
+  recursos         recursos? @relation(fields: [id_producto], references: [id], onDelete: Cascade, map: "fk_materia_activa_recursos")
+
+  @@index([id_producto], map: "fk_materia_activa_recursos")
+}
+
+model notifications {
+  id          Int       @id @default(autoincrement())
+  type        String    @db.Text
+  title       String    @db.Text
+  message     String    @db.Text
+  entity_type String    @db.Text
+  user_id     Int
+  severity    String    @db.Text
+  created_at  DateTime  @db.Date
+  read_at     DateTime? @db.Date
+  usuarios    usuarios  @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_notification_user")
+
+  @@index([user_id], map: "fk_notification_user")
+}
+
+enum plagas_severidad {
+  baja
+  media
+  alta
+  cr_tica @map("crítica")
+}
+
+enum vehiculos_tipo {
+  agr_cola                 @map("agrícola")
+  transporte_de_mercanc_as @map("transporte de mercancías")
+  transporte_de_personas   @map("transporte de personas")
+}
+
+enum vehiculos_combustible {
+  gasolina
+  diesel
+}

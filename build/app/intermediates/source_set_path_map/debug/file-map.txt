@@ -1,0 +1,43 @@
+com.example.gest_parcelas.app-jetified-profileinstaller-1.3.1-0 C:\Users\mario\.gradle\caches\8.9\transforms\077a8f66b9e0643096660e62609e3027\transformed\jetified-profileinstaller-1.3.1\res
+com.example.gest_parcelas.app-jetified-lifecycle-runtime-ktx-2.7.0-1 C:\Users\mario\.gradle\caches\8.9\transforms\0be1fc3731496817958a6b325da4508f\transformed\jetified-lifecycle-runtime-ktx-2.7.0\res
+com.example.gest_parcelas.app-core-runtime-2.2.0-2 C:\Users\mario\.gradle\caches\8.9\transforms\125fc34f4274554e7540aa2d7473f648\transformed\core-runtime-2.2.0\res
+com.example.gest_parcelas.app-core-1.13.1-3 C:\Users\mario\.gradle\caches\8.9\transforms\14bed514b1dffb58de0d439a5f6f9b5b\transformed\core-1.13.1\res
+com.example.gest_parcelas.app-fragment-1.7.1-4 C:\Users\mario\.gradle\caches\8.9\transforms\1ab93f301ae2afc6297f9844c8448973\transformed\fragment-1.7.1\res
+com.example.gest_parcelas.app-jetified-window-1.2.0-5 C:\Users\mario\.gradle\caches\8.9\transforms\1c56ace3d94383812081685447f4b971\transformed\jetified-window-1.2.0\res
+com.example.gest_parcelas.app-preference-1.2.1-6 C:\Users\mario\.gradle\caches\8.9\transforms\1ddc2e2c4edcbd3028f919f44308cf3c\transformed\preference-1.2.1\res
+com.example.gest_parcelas.app-jetified-datastore-core-release-7 C:\Users\mario\.gradle\caches\8.9\transforms\3631898a388a29dd60470554cf23a448\transformed\jetified-datastore-core-release\res
+com.example.gest_parcelas.app-coordinatorlayout-1.0.0-8 C:\Users\mario\.gradle\caches\8.9\transforms\39fbb72c71845802fcc2dafc639165ad\transformed\coordinatorlayout-1.0.0\res
+com.example.gest_parcelas.app-jetified-activity-1.8.1-9 C:\Users\mario\.gradle\caches\8.9\transforms\42d93546b7ffc3681f344b5f292297cd\transformed\jetified-activity-1.8.1\res
+com.example.gest_parcelas.app-lifecycle-livedata-core-2.7.0-10 C:\Users\mario\.gradle\caches\8.9\transforms\4573fd2943597e67deebaa66c07595a5\transformed\lifecycle-livedata-core-2.7.0\res
+com.example.gest_parcelas.app-lifecycle-runtime-2.7.0-11 C:\Users\mario\.gradle\caches\8.9\transforms\50ed69c18b7a9761591c2d06316ff39f\transformed\lifecycle-runtime-2.7.0\res
+com.example.gest_parcelas.app-jetified-savedstate-ktx-1.2.1-12 C:\Users\mario\.gradle\caches\8.9\transforms\517c48546c4bfbcbd1311b2c71c1a825\transformed\jetified-savedstate-ktx-1.2.1\res
+com.example.gest_parcelas.app-jetified-datastore-preferences-release-13 C:\Users\mario\.gradle\caches\8.9\transforms\62824d990c07882b1454f7f031af516e\transformed\jetified-datastore-preferences-release\res
+com.example.gest_parcelas.app-jetified-startup-runtime-1.1.1-14 C:\Users\mario\.gradle\caches\8.9\transforms\64195c6e21c111abba8422b84a74c1b3\transformed\jetified-startup-runtime-1.1.1\res
+com.example.gest_parcelas.app-jetified-appcompat-resources-1.1.0-15 C:\Users\mario\.gradle\caches\8.9\transforms\726b91f545f5902a483ef900c7b9fdff\transformed\jetified-appcompat-resources-1.1.0\res
+com.example.gest_parcelas.app-lifecycle-livedata-2.7.0-16 C:\Users\mario\.gradle\caches\8.9\transforms\73ceafeb077c216a38b908d86f534242\transformed\lifecycle-livedata-2.7.0\res
+com.example.gest_parcelas.app-jetified-savedstate-1.2.1-17 C:\Users\mario\.gradle\caches\8.9\transforms\74327a3b64ae0f622fe73b344d118ffe\transformed\jetified-savedstate-1.2.1\res
+com.example.gest_parcelas.app-jetified-lifecycle-livedata-core-ktx-2.7.0-18 C:\Users\mario\.gradle\caches\8.9\transforms\7613459e27dec1f5d71618e19aabe9f9\transformed\jetified-lifecycle-livedata-core-ktx-2.7.0\res
+com.example.gest_parcelas.app-jetified-core-ktx-1.13.1-19 C:\Users\mario\.gradle\caches\8.9\transforms\9aa6dc53cb526042df2d1f45691d6949\transformed\jetified-core-ktx-1.13.1\res
+com.example.gest_parcelas.app-jetified-fragment-ktx-1.7.1-20 C:\Users\mario\.gradle\caches\8.9\transforms\9ccfb4eb02cfc90e8fb5feabe53d5b41\transformed\jetified-fragment-ktx-1.7.1\res
+com.example.gest_parcelas.app-transition-1.4.1-21 C:\Users\mario\.gradle\caches\8.9\transforms\afab734d72dfbe3a40d44543ae7e7c60\transformed\transition-1.4.1\res
+com.example.gest_parcelas.app-jetified-core-1.0.0-22 C:\Users\mario\.gradle\caches\8.9\transforms\b219e2b9ecfb8f077ea3fb005f514710\transformed\jetified-core-1.0.0\res
+com.example.gest_parcelas.app-jetified-lifecycle-viewmodel-ktx-2.7.0-23 C:\Users\mario\.gradle\caches\8.9\transforms\c06c21f8e0086dcb1f0d7f762b765fc2\transformed\jetified-lifecycle-viewmodel-ktx-2.7.0\res
+com.example.gest_parcelas.app-jetified-lifecycle-process-2.7.0-24 C:\Users\mario\.gradle\caches\8.9\transforms\c97a611227134de67ff8cf1be8b4491b\transformed\jetified-lifecycle-process-2.7.0\res
+com.example.gest_parcelas.app-jetified-tracing-1.2.0-25 C:\Users\mario\.gradle\caches\8.9\transforms\ca4d66b66cf55bfb8106dd0642f05e29\transformed\jetified-tracing-1.2.0\res
+com.example.gest_parcelas.app-slidingpanelayout-1.2.0-26 C:\Users\mario\.gradle\caches\8.9\transforms\dd4f63f4d24c5df3f9c3ba1481c59f61\transformed\slidingpanelayout-1.2.0\res
+com.example.gest_parcelas.app-jetified-window-java-1.2.0-27 C:\Users\mario\.gradle\caches\8.9\transforms\dea6f7f7462292ee5340a6aed7a8d7d2\transformed\jetified-window-java-1.2.0\res
+com.example.gest_parcelas.app-jetified-lifecycle-viewmodel-savedstate-2.7.0-28 C:\Users\mario\.gradle\caches\8.9\transforms\e343372f0a52e7677c50b3f3ec66efea\transformed\jetified-lifecycle-viewmodel-savedstate-2.7.0\res
+com.example.gest_parcelas.app-recyclerview-1.0.0-29 C:\Users\mario\.gradle\caches\8.9\transforms\e998696aa2fc65828ae5e488cf3fb03d\transformed\recyclerview-1.0.0\res
+com.example.gest_parcelas.app-jetified-datastore-release-30 C:\Users\mario\.gradle\caches\8.9\transforms\ed324392290572ab5876b9a77d046e23\transformed\jetified-datastore-release\res
+com.example.gest_parcelas.app-lifecycle-viewmodel-2.7.0-31 C:\Users\mario\.gradle\caches\8.9\transforms\f1ba8b1ac3ae9f25330d0005436bcaad\transformed\lifecycle-viewmodel-2.7.0\res
+com.example.gest_parcelas.app-appcompat-1.1.0-32 C:\Users\mario\.gradle\caches\8.9\transforms\f747a96403aa67b41da4ee2071db8022\transformed\appcompat-1.1.0\res
+com.example.gest_parcelas.app-jetified-annotation-experimental-1.4.0-33 C:\Users\mario\.gradle\caches\8.9\transforms\f9a5cbf7f18be5d28be778d4d2a76ba9\transformed\jetified-annotation-experimental-1.4.0\res
+com.example.gest_parcelas.app-jetified-activity-ktx-1.8.1-34 C:\Users\mario\.gradle\caches\8.9\transforms\fa23b1f0eaabfd49c9a097a668602e4a\transformed\jetified-activity-ktx-1.8.1\res
+com.example.gest_parcelas.app-debug-35 C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores\android\app\src\debug\res
+com.example.gest_parcelas.app-main-36 C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores\android\app\src\main\res
+com.example.gest_parcelas.app-pngs-37 C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores\build\app\generated\res\pngs\debug
+com.example.gest_parcelas.app-resValues-38 C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores\build\app\generated\res\resValues\debug
+com.example.gest_parcelas.app-packageDebugResources-39 C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores\build\app\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.example.gest_parcelas.app-packageDebugResources-40 C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores\build\app\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.example.gest_parcelas.app-merged_res-41 C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores\build\app\intermediates\merged_res\debug
+com.example.gest_parcelas.app-packaged_res-42 C:\proyectos frutas calanda\sw_gestion_parcelas\app\agrihub-mobile-agricultores\build\shared_preferences_android\intermediates\packaged_res\debug
