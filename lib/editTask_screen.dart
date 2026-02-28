@@ -8,8 +8,8 @@ import 'repositories/accesorio_repository.dart';
 import 'repositories/parcela_repository.dart';
 import 'repositories/task_repository.dart';
 import 'services/tarea_service.dart';
-import 'models/tarea_model.dart';
 import 'models/parcela_model.dart';
+import 'models/vehiculo_model.dart';
 
 class EditarTareaPage extends StatefulWidget {
   final Task? task;
@@ -42,6 +42,8 @@ class _EditarTareaPageState extends State<EditarTareaPage> {
   List<String> possibleVariedades = [];
   List<String> possibleOfficers = [];
   List<String> possibleTypes = [];
+  Map<String, VehiculoModel> _vehiculosByNombre = {};
+  Map<String, VehiculoModel> _vehiculosByMatricula = {};
   
   List<ParcelaModel> _selectedParcelas = []; // Parcelas individuales seleccionadas
   
@@ -137,6 +139,7 @@ class _EditarTareaPageState extends State<EditarTareaPage> {
       final results = await Future.wait([
         _empleadoRepository.getNombresEmpleados(),
         _vehiculoRepository.getNombresVehiculos(),
+        _vehiculoRepository.getVehiculos(),
         _parcelaRepository.getFincas(),
         _parcelaRepository.getVariedades(),
         _taskRepository.getTiposTarea(),
@@ -144,14 +147,17 @@ class _EditarTareaPageState extends State<EditarTareaPage> {
       ]);
       
       setState(() {
-        nombreEmpleados = results[0];
-        possiblesVehiculos = results[1];
-        possibleFields = results[2];
-        possibleVariedades = results[3];
-        possibleTypes = results[4];
+        nombreEmpleados = List<String>.from(results[0] as List);
+        possiblesVehiculos = List<String>.from(results[1] as List);
+        final vehiculos = results[2] as List<VehiculoModel>;
+        _vehiculosByNombre = {for (final v in vehiculos) v.nombre: v};
+        _vehiculosByMatricula = {for (final v in vehiculos) v.matricula: v};
+        possibleFields = List<String>.from(results[3] as List);
+        possibleVariedades = List<String>.from(results[4] as List);
+        possibleTypes = List<String>.from(results[5] as List);
         
         // Los responsables son solo agricultores
-        possibleOfficers = results[5];
+        possibleOfficers = List<String>.from(results[6] as List);
         
         // Si la tarea ya tiene un tipo, cargar recursos para ese tipo
         if (_task.type != null && _task.type!.isNotEmpty) {
@@ -213,6 +219,176 @@ class _EditarTareaPageState extends State<EditarTareaPage> {
 
   bool _isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  String _normalizeText(String text) {
+    return text
+        .toLowerCase()
+        .replaceAll('á', 'a')
+        .replaceAll('é', 'e')
+        .replaceAll('í', 'i')
+        .replaceAll('ó', 'o')
+        .replaceAll('ú', 'u');
+  }
+
+  VehiculoModel? _findVehiculoModel(Vehiculo vehiculo) {
+    if (vehiculo.matricula != null && vehiculo.matricula!.isNotEmpty) {
+      final byMatricula = _vehiculosByMatricula[vehiculo.matricula!];
+      if (byMatricula != null) return byMatricula;
+    }
+    return _vehiculosByNombre[vehiculo.nombre];
+  }
+
+  bool _isVehiculoAgricola(Vehiculo vehiculo) {
+    final model = _findVehiculoModel(vehiculo);
+    final tipo = (vehiculo.tipo?.isNotEmpty == true ? vehiculo.tipo : model?.tipo) ?? '';
+    final normalized = _normalizeText(tipo);
+    return normalized.contains('agricola');
+  }
+
+  String _vehiculoUnidad(Vehiculo vehiculo) {
+    return _isVehiculoAgricola(vehiculo) ? 'h' : 'viajes';
+  }
+
+  Future<Map<String, int>?> _showValoresPorFechaDialog({
+    required String title,
+    required IconData icon,
+    required String measureLabel,
+    required String assignAllLabel,
+    required DateTime startDay,
+    required DateTime endDay,
+    required Map<String, int> initialValues,
+  }) async {
+    final List<DateTime> dates = [];
+    DateTime current = startDay;
+    while (!current.isAfter(endDay)) {
+      dates.add(current);
+      current = current.add(const Duration(days: 1));
+    }
+
+    final Map<int, int> values = {};
+    for (var i = 0; i < dates.length; i++) {
+      final key = DateFormat('yyyy-MM-dd').format(dates[i]);
+      values[i] = initialValues[key] ?? 0;
+    }
+
+    int? assignAll;
+
+    return showDialog<Map<String, int>>(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: Row(
+                children: [
+                  Icon(icon),
+                  const SizedBox(width: 8),
+                  Flexible(child: Text(title, softWrap: true)),
+                ],
+              ),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(child: Text(assignAllLabel)),
+                        DropdownButton<int?>(
+                          value: assignAll,
+                          items: [
+                            const DropdownMenuItem<int?>(value: null, child: Text('-')),
+                            ...List.generate(15, (i) => i).map((v) => DropdownMenuItem<int?>(value: v, child: Text(v.toString()))),
+                          ],
+                          onChanged: (v) {
+                            setStateDialog(() {
+                              assignAll = v;
+                              if (v != null) {
+                                for (var i = 0; i < dates.length; i++) {
+                                  values[i] = v;
+                                }
+                              }
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        const Expanded(flex: 1, child: Center(child: Text('Día', style: TextStyle(fontWeight: FontWeight.bold)))),
+                        Expanded(flex: 1, child: Center(child: Text(measureLabel, style: const TextStyle(fontWeight: FontWeight.bold)))),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Flexible(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: List.generate(dates.length, (index) {
+                            final d = dates[index];
+                            final label = DateFormat('d MMM').format(d);
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4.0),
+                              child: Row(
+                                children: [
+                                  Expanded(flex: 1, child: Center(child: Text(label))),
+                                  Expanded(
+                                    flex: 1,
+                                    child: Center(
+                                      child: DropdownButton<int>(
+                                        value: values[index],
+                                        items: List.generate(15, (i) => i).map((v) => DropdownMenuItem(value: v, child: Text(v.toString()))).toList(),
+                                        onChanged: (v) {
+                                          if (v == null) return;
+                                          setStateDialog(() {
+                                            values[index] = v;
+                                            assignAll = null;
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: TextButton.styleFrom(foregroundColor: Colors.red),
+                      child: const Text('Cancelar'),
+                    ),
+                    const SizedBox(width: 12),
+                    TextButton(
+                      onPressed: () {
+                        final Map<String, int> result = {};
+                        for (var i = 0; i < dates.length; i++) {
+                          final key = DateFormat('yyyy-MM-dd').format(dates[i]);
+                          result[key] = values[i] ?? 0;
+                        }
+                        Navigator.of(context).pop(result);
+                      },
+                      child: const Text('Guardar'),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   void mostrarCalendario(BuildContext context) async {
@@ -605,169 +781,75 @@ class _EditarTareaPageState extends State<EditarTareaPage> {
                   icon: const Icon(Icons.more_time_rounded),
                   padding: const EdgeInsets.all(6.0),
                   constraints: const BoxConstraints(),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        // build dates in range
-                        List<DateTime> dates = [];
-                        DateTime cur = startDay;
-                        while (!cur.isAfter(endDay)) {
-                          dates.add(cur);
-                          cur = cur.add(const Duration(days: 1));
-                        }
+                  onPressed: () async {
+                    final Map<String, int> initialValues = {};
+                    DateTime cursor = startDay;
+                    while (!cursor.isAfter(endDay)) {
+                      final key = DateFormat('yyyy-MM-dd').format(cursor);
+                      final rec = records.firstWhere(
+                        (r) => _isSameDay(r.fecha, cursor),
+                        orElse: () => HorasEmpleado(
+                          id: 0,
+                          empleado: empleado,
+                          tarea: _task.id,
+                          fecha: cursor,
+                          horas: 0,
+                          inicio: DateTime(cursor.year, cursor.month, cursor.day, 0, 0),
+                          fin: DateTime(cursor.year, cursor.month, cursor.day, 0, 0),
+                        ),
+                      );
+                      initialValues[key] = rec.horas;
+                      cursor = cursor.add(const Duration(days: 1));
+                    }
 
-                        // initial values per date from records
-                        Map<int, int> values = {};
-                        for (var i = 0; i < dates.length; i++) {
-                          final d = dates[i];
-                          final rec = records.firstWhere((r) => _isSameDay(r.fecha, d), orElse: () => HorasEmpleado(id: 0, empleado: empleado, tarea: _task.id, fecha: d, horas: 0, inicio: DateTime(d.year, d.month, d.day, 0, 0), fin: DateTime(d.year, d.month, d.day, 0, 0)));
-                          values[i] = rec.horas;
-                        }
-
-                        int? assignAll;
-
-                        return StatefulBuilder(
-                          builder: (context, setStateDialog) {
-                            return AlertDialog(
-                              title: Row(
-                                children: [
-                                  const Icon(Icons.access_time_rounded),
-                                  const SizedBox(width: 8),
-                                  Flexible(child: Text('Horas trabajadas de ${empleado.nombre}', softWrap: true)),
-                                ],
-                              ),
-                              content: SizedBox(
-                                width: double.maxFinite,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        const Expanded(child: Text('Asignar las mismas horas a todos los días')),
-                                        DropdownButton<int?>(
-                                          value: assignAll,
-                                          items: [
-                                            const DropdownMenuItem<int?>(value: null, child: Text('-')),
-                                            ...List.generate(15, (i) => i).map((v) => DropdownMenuItem<int?>(value: v, child: Text(v.toString()))),
-                                          ],
-                                          onChanged: (v) {
-                                            setStateDialog(() {
-                                              assignAll = v;
-                                              if (v != null) {
-                                                for (var i = 0; i < dates.length; i++) {
-                                                  values[i] = v;
-                                                }
-                                              }
-                                            });
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Row(
-                                      children: const [
-                                        Expanded(flex: 1, child: Center(child: Text('Día', style: TextStyle(fontWeight: FontWeight.bold)))),
-                                        Expanded(flex: 1, child: Center(child: Text('Horas', style: TextStyle(fontWeight: FontWeight.bold)))),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Flexible(
-                                      child: SingleChildScrollView(
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: List.generate(dates.length, (index) {
-                                            final d = dates[index];
-                                            final label = DateFormat('d MMM').format(d);
-                                            return Padding(
-                                              padding: const EdgeInsets.symmetric(vertical: 4.0),
-                                              child: Row(
-                                                children: [
-                                                  Expanded(flex: 1, child: Center(child: Text(label))),
-                                                  Expanded(
-                                                    flex: 1,
-                                                    child: Center(
-                                                      child: DropdownButton<int>(
-                                                        value: values[index],
-                                                        items: List.generate(15, (i) => i).map((v) => DropdownMenuItem(value: v, child: Text(v.toString()))).toList(),
-                                                        onChanged: (v) {
-                                                          if (v == null) return;
-                                                          setStateDialog(() {
-                                                            values[index] = v;
-                                                            assignAll = null;
-                                                          });
-                                                        },
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          }),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              actions: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    TextButton(
-                                      onPressed: () => Navigator.of(context).pop(),
-                                      style: TextButton.styleFrom(foregroundColor: Colors.red),
-                                      child: const Text('Cancelar'),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    TextButton(
-                                      onPressed: () {
-                                        // save: replace existing records for this empleado in date range preserving order
-                                        setState(() {
-                                          // build map of existing records by date to their indices
-                                          final Map<String, int> existingIndexByDay = {};
-                                          for (var idx = 0; idx < _task.empleados.length; idx++) {
-                                            final r = _task.empleados[idx];
-                                            if (r.empleado.nombre == empleado.nombre) {
-                                              final key = '${r.fecha.year}-${r.fecha.month}-${r.fecha.day}';
-                                              existingIndexByDay[key] = idx;
-                                            }
-                                          }
-
-                                          for (var i = 0; i < dates.length; i++) {
-                                            final h = values[i] ?? 0;
-                                            final d = dates[i];
-                                            final key = '${d.year}-${d.month}-${d.day}';
-                                            final newRecord = HorasEmpleado(id: DateTime.now().millisecondsSinceEpoch + i, empleado: empleado, tarea: _task.id, fecha: d, horas: h, inicio: DateTime(d.year, d.month, d.day, 9, 0), fin: DateTime(d.year, d.month, d.day, 9 + (h > 0 ? h : 0), 0));
-                                            if (existingIndexByDay.containsKey(key)) {
-                                              // replace at original index
-                                              final idx = existingIndexByDay[key]!;
-                                              _task.empleados[idx] = newRecord;
-                                            } else {
-                                              // append if no existing record
-                                              _task.empleados.add(newRecord);
-                                            }
-                                          }
-
-                                          // remove any leftover records for this empleado outside the current dates
-                                          _task.empleados.removeWhere((r) {
-                                            if (r.empleado.nombre != empleado.nombre) return false;
-                                            final d = DateTime(r.fecha.year, r.fecha.month, r.fecha.day);
-                                            return d.isBefore(startDay) || d.isAfter(endDay);
-                                          });
-                                        });
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text('Guardar'),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
+                    final result = await _showValoresPorFechaDialog(
+                      title: 'Horas trabajadas de ${empleado.nombre}',
+                      icon: Icons.access_time_rounded,
+                      measureLabel: 'Horas',
+                      assignAllLabel: 'Asignar las mismas horas a todos los días',
+                      startDay: startDay,
+                      endDay: endDay,
+                      initialValues: initialValues,
                     );
+
+                    if (result == null) return;
+
+                    setState(() {
+                      final Map<String, int> existingIndexByDay = {};
+                      for (var idx = 0; idx < _task.empleados.length; idx++) {
+                        final r = _task.empleados[idx];
+                        if (r.empleado.nombre == empleado.nombre) {
+                          final key = DateFormat('yyyy-MM-dd').format(r.fecha);
+                          existingIndexByDay[key] = idx;
+                        }
+                      }
+
+                      result.forEach((key, horas) {
+                        final d = DateTime.parse(key);
+                        final newRecord = HorasEmpleado(
+                          id: DateTime.now().millisecondsSinceEpoch + d.day,
+                          empleado: empleado,
+                          tarea: _task.id,
+                          fecha: d,
+                          horas: horas,
+                          inicio: DateTime(d.year, d.month, d.day, 9, 0),
+                          fin: DateTime(d.year, d.month, d.day, 9 + (horas > 0 ? horas : 0), 0),
+                        );
+
+                        if (existingIndexByDay.containsKey(key)) {
+                          final idx = existingIndexByDay[key]!;
+                          _task.empleados[idx] = newRecord;
+                        } else {
+                          _task.empleados.add(newRecord);
+                        }
+                      });
+
+                      _task.empleados.removeWhere((r) {
+                        if (r.empleado.nombre != empleado.nombre) return false;
+                        final d = DateTime(r.fecha.year, r.fecha.month, r.fecha.day);
+                        return d.isBefore(startDay) || d.isAfter(endDay);
+                      });
+                    });
                   },
                 ),
                 IconButton(
@@ -855,16 +937,47 @@ class _EditarTareaPageState extends State<EditarTareaPage> {
   }
 
   Widget buildListaVehiculos(List<Vehiculo> items, List<String> possibleOptions) {
+    final range = _fechasToRange();
+    final startDay = DateTime(range.start.year, range.start.month, range.start.day);
+    final endDay = DateTime(range.end.year, range.end.month, range.end.day);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('Vehículos', style: TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         ...items.map((item) {
+          final vehiculoModel = _findVehiculoModel(item);
+          if (item.matricula == null || item.matricula!.isEmpty) {
+            item.matricula = vehiculoModel?.matricula;
+          }
+          if (item.tipo == null || item.tipo!.isEmpty) {
+            item.tipo = vehiculoModel?.tipo;
+          }
+
           // Mostrar como "nombre" o "nombre con accesorio"
           final displayText = item.accesorioNombre != null && item.accesorioNombre!.isNotEmpty
               ? '${item.nombre} con ${item.accesorioNombre}'
               : item.nombre;
+
+          int totalUsage = 0;
+          item.valores.forEach((fechaStr, value) {
+            try {
+              final d = DateTime.parse(fechaStr);
+              final day = DateTime(d.year, d.month, d.day);
+              if (!day.isBefore(startDay) && !day.isAfter(endDay)) {
+                totalUsage += value;
+              }
+            } catch (_) {}
+          });
+          final unidad = _vehiculoUnidad(item);
+          final tituloValores = _isVehiculoAgricola(item)
+              ? 'Horas de uso de ${item.nombre}'
+              : 'Viajes al almacén de ${item.nombre}';
+          final etiquetaMedida = _isVehiculoAgricola(item) ? 'Horas' : 'Viajes';
+          final etiquetaAsignar = _isVehiculoAgricola(item)
+              ? 'Asignar las mismas horas a todos los días'
+              : 'Asignar los mismos viajes a todos los días';
           
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 6.0),
@@ -876,7 +989,45 @@ class _EditarTareaPageState extends State<EditarTareaPage> {
                   radius: 25,
                   child: Icon(Icons.directions_car)),
                 const SizedBox(width: 12),
-                Expanded(child: Text(displayText)),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(displayText, overflow: TextOverflow.ellipsis),
+                      Text('$totalUsage $unidad', style: const TextStyle(color: Colors.black54)),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.more_time_rounded),
+                  padding: const EdgeInsets.all(6.0),
+                  constraints: const BoxConstraints(),
+                  onPressed: () async {
+                    final Map<String, int> initialValues = {};
+                    DateTime cursor = startDay;
+                    while (!cursor.isAfter(endDay)) {
+                      final key = DateFormat('yyyy-MM-dd').format(cursor);
+                      initialValues[key] = item.valores[key] ?? 0;
+                      cursor = cursor.add(const Duration(days: 1));
+                    }
+
+                    final result = await _showValoresPorFechaDialog(
+                      title: tituloValores,
+                      icon: Icons.more_time_rounded,
+                      measureLabel: etiquetaMedida,
+                      assignAllLabel: etiquetaAsignar,
+                      startDay: startDay,
+                      endDay: endDay,
+                      initialValues: initialValues,
+                    );
+
+                    if (result == null) return;
+
+                    setState(() {
+                      item.valores = result;
+                    });
+                  },
+                ),
                 // Botón para agregar/cambiar accesorio
                 IconButton(
                   icon: Icon(
@@ -991,9 +1142,15 @@ class _EditarTareaPageState extends State<EditarTareaPage> {
                       TextButton(
                         onPressed: () {
                           if (selectedItem != null) {
+                            final selectedVehiculoModel = _vehiculosByNombre[selectedItem!];
                             setState(() {
                               _task.vehiculos.add(
-                                Vehiculo(nombre: selectedItem!),
+                                Vehiculo(
+                                  nombre: selectedItem!,
+                                  matricula: selectedVehiculoModel?.matricula,
+                                  tipo: selectedVehiculoModel?.tipo,
+                                  valores: <String, int>{},
+                                ),
                               );
                             });
                           }
@@ -1444,19 +1601,25 @@ class _EditarTareaPageState extends State<EditarTareaPage> {
                       print('\n  Vehículo [$i]: ${vehiculo.nombre}');
                       print('    - Matrícula: ${vehiculo.matricula}');
                       print('    - Accesorio ID: ${vehiculo.accesorioId}');
+                      print('    - Valores: ${vehiculo.valores}');
                       
                       // Buscar el vehíedculo por nombre
                       final vehiculoModel = vehiculosModels.firstWhere(
-                        (v) => v.nombre == vehiculo.nombre,
+                        (v) => v.nombre == vehiculo.nombre || (vehiculo.matricula != null && vehiculo.matricula!.isNotEmpty && v.matricula == vehiculo.matricula),
                         orElse: () => throw Exception('Vehíedculo no encontrado: ${vehiculo.nombre}'),
                       );
                       print('    - ID encontrado: ${vehiculoModel.id}');
                       print('    - Matríedcula encontrada: ${vehiculoModel.matricula}');
+
+                      final Map<String, int> valoresVehiculo = <String, int>{};
+                      vehiculo.valores.forEach((fecha, valor) {
+                        valoresVehiculo[fecha] = valor;
+                      });
                       
                       final Map<String, dynamic> vehiculoData = {
                         'id': vehiculoModel.id,  // Usar ID del vehículo (requerido)
                         'matricula': vehiculoModel.matricula,  // Matrícula es requerida por el backend
-                        'valores': {}, // Agregar valores vacíos por ahora
+                        'valores': valoresVehiculo,
                       };
                       if (vehiculo.accesorioId != null) {
                         vehiculoData['accesorio'] = {'id': vehiculo.accesorioId};

@@ -5,6 +5,46 @@ import 'api_service.dart';
 class TareaService {
   final ApiService _apiService = ApiService();
 
+  Map<String, dynamic> _extractTaskPayload(Map<String, dynamic> response) {
+    dynamic current = response;
+
+    for (int depth = 0; depth < 5; depth++) {
+      if (current is! Map<String, dynamic>) {
+        break;
+      }
+
+      final hasTaskFields = current.containsKey('fecha_inicio') ||
+          current.containsKey('fecha_final') ||
+          current.containsKey('tipo_tarea') ||
+          current.containsKey('parcelas') ||
+          current.containsKey('gastos_empleados') ||
+          current.containsKey('gastos_vehiculos') ||
+          current.containsKey('gastos_recursos');
+
+      if (hasTaskFields) {
+        return current;
+      }
+
+      if (current.containsKey('data')) {
+        current = current['data'];
+        continue;
+      }
+
+      if (current.containsKey('tarea')) {
+        current = current['tarea'];
+        continue;
+      }
+
+      break;
+    }
+
+    if (current is Map<String, dynamic>) {
+      return current;
+    }
+
+    throw Exception('Formato inesperado del payload de tarea: ${current.runtimeType}');
+  }
+
   // Obtener tareas con filtros
   Future<List<TareaModel>> getTareas({
     required DateTime fechaDesde,
@@ -132,8 +172,9 @@ class TareaService {
       print('📦 [TareaService.getTareaById] Respuesta recibida:');
       print('   Keys: ${response.keys}');
       print('   Tiene campo tarea: ${response.containsKey('tarea')}');
+      print('   Tiene campo data: ${response.containsKey('data')}');
       
-      final tareaData = response['tarea'] ?? response;
+      final tareaData = _extractTaskPayload(response);
       print('   📋 Campo tarea keys: ${tareaData.keys}');
       print('   📋 gastos_empleados: ${tareaData['gastos_empleados']?.runtimeType} - ${tareaData['gastos_empleados']?.length ?? 0} items');
       print('   📋 gastos_vehiculos: ${tareaData['gastos_vehiculos']?.runtimeType} - ${tareaData['gastos_vehiculos']?.length ?? 0} items');
@@ -271,14 +312,7 @@ class TareaService {
       print('   Tiene campo data: ${response.containsKey('data')}');
       
       // Manejar diferentes formatos de respuesta
-      Map<String, dynamic> tareaData;
-      if (response.containsKey('tarea')) {
-        tareaData = response['tarea'];
-      } else if (response.containsKey('data')) {
-        tareaData = response['data'];
-      } else {
-        tareaData = response;
-      }
+      final tareaData = _extractTaskPayload(response);
       
       print('   📦 Parseando tarea desde: ${tareaData.keys}');
       return TareaModel.fromJson(tareaData);

@@ -21,8 +21,12 @@ class TaskRepository {
 
   /// Obtiene las tareas para un día específico
   /// Carga el mes completo si no está en caché
-  Future<List<Task>> getTasksForDay(DateTime day) async {
+  Future<List<Task>> getTasksForDay(DateTime day, {bool forceRefresh = false}) async {
     final monthKey = _getMonthKey(day);
+
+    if (forceRefresh) {
+      _taskCache.remove(monthKey);
+    }
     
     // Si no está en cache, cargar el mes completo
     if (!_taskCache.containsKey(monthKey)) {

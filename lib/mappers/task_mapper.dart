@@ -54,16 +54,45 @@ class TaskMapper {
     // Convertir gastosVehiculos a List<Vehiculo>
     List<Vehiculo> vehiculos = [];
     if (tareaModel.gastosVehiculos != null) {
-      Set<String> matriculasVistas = {};
+      final Map<String, Vehiculo> vehiculosByKey = {};
+
       for (var gastoVehiculo in tareaModel.gastosVehiculos!) {
-        if (!matriculasVistas.contains(gastoVehiculo.matricula)) {
-          vehiculos.add(Vehiculo(
-            nombre: gastoVehiculo.matricula, // Usar matricula como nombre por defecto
-            matricula: gastoVehiculo.matricula,
-          ));
-          matriculasVistas.add(gastoVehiculo.matricula);
+        final matricula = gastoVehiculo.matricula.trim();
+        final nombre = (gastoVehiculo.nombreVehiculo ?? matricula).trim();
+        final key = matricula.isNotEmpty
+            ? 'm:$matricula'
+            : (nombre.isNotEmpty ? 'n:$nombre' : 'id:${gastoVehiculo.id ?? 0}');
+
+        if (!vehiculosByKey.containsKey(key)) {
+          vehiculosByKey[key] = Vehiculo(
+            nombre: nombre.isNotEmpty ? nombre : 'Vehículo',
+            matricula: matricula.isNotEmpty ? matricula : null,
+            tipo: gastoVehiculo.tipoVehiculo,
+            accesorioId: gastoVehiculo.idAccesorio,
+            accesorioNombre: gastoVehiculo.nombreAccesorio,
+            valores: <String, int>{},
+          );
+        }
+
+        final vehiculo = vehiculosByKey[key]!;
+        if ((vehiculo.tipo == null || vehiculo.tipo!.isEmpty) &&
+            gastoVehiculo.tipoVehiculo != null &&
+            gastoVehiculo.tipoVehiculo!.isNotEmpty) {
+          vehiculo.tipo = gastoVehiculo.tipoVehiculo;
+        }
+
+        if (gastoVehiculo.valores != null) {
+          gastoVehiculo.valores!.forEach((fechaStr, valor) {
+            if (valor is num) {
+              vehiculo.valores[fechaStr] = valor.toInt();
+            } else {
+              vehiculo.valores[fechaStr] = int.tryParse(valor?.toString() ?? '0') ?? 0;
+            }
+          });
         }
       }
+
+      vehiculos = vehiculosByKey.values.toList();
     }
 
     // Convertir gastosRecursos a List<RegistroCantidadRecursos>
@@ -95,6 +124,7 @@ class TaskMapper {
     return Task(
       id: tareaModel.id ?? 0,
       isCompleted: tareaModel.completada,
+      nombre: tareaModel.nombre,
       fieldName: tareaModel.parcelas?.isNotEmpty == true
           ? tareaModel.parcelas!.first.finca
           : null,
@@ -166,7 +196,7 @@ class TaskMapper {
     return TareaModel(
       id: task.id != 0 ? task.id : null,
       tipoTarea: task.type ?? '',
-      nombre: task.fieldName,
+      nombre: task.nombre,
       fechaInicio: task.inicio,
       fechaFinal: task.fin,
       responsable: task.officer,

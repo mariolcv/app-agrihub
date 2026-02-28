@@ -42,7 +42,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     });
 
     try {
-      final tasks = await _taskRepository.getTasksForDay(_selectedDay!);
+      final tasks = await _taskRepository.getTasksForDay(_selectedDay!, forceRefresh: true);
       _selectedTasks.value = tasks;
     } catch (e) {
       if (mounted) {
@@ -230,7 +230,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
             child: Icon(icono, color: color),
           ),
           title: Text(titulo),
-          trailing: const Icon(Icons.arrow_forward_ios),
           onTap: onTap,
         ),
         const Divider(
@@ -245,7 +244,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   String _getTitleTask(Task task) {
-    return '${task.fieldName}: ${task.officer}';
+    return getTaskListTitle(task);
   }
 
   IconData _getIconForEvent(Task task) {

@@ -1,1 +1,0 @@
- C:\\proyectos\ frutas\ calanda\\sw_gestion_parcelas\\app\\agrihub-mobile-agricultores\\.dart_tool\\flutter_build\\b080332ebed4d28622f1a37cecb93e84\\native_assets.yaml: 

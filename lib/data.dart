@@ -171,23 +171,41 @@ class RegistroCantidadRecursos {
 class Vehiculo {
   String nombre;
   String? matricula;
+  String? tipo;
   int? accesorioId; // ID del accesorio de vehículo (remolque, arado, etc.)
   String? accesorioNombre; // Nombre del accesorio para visualización
+  Map<String, int> valores;
   Icon foto = const Icon(Icons.directions_car);
 
   Vehiculo({
     required this.nombre,
     this.matricula,
+    this.tipo,
     this.accesorioId,
     this.accesorioNombre,
-  });
+    Map<String, int>? valores,
+  }) : valores = valores ?? <String, int>{};
 
   factory Vehiculo.fromJson(Map<String, dynamic> json) {
+    final rawValores = json['valores'];
+    final Map<String, int> parsedValores = <String, int>{};
+    if (rawValores is Map) {
+      rawValores.forEach((key, value) {
+        if (value is num) {
+          parsedValores[key.toString()] = value.toInt();
+        } else {
+          parsedValores[key.toString()] = int.tryParse(value?.toString() ?? '0') ?? 0;
+        }
+      });
+    }
+
     return Vehiculo(
       nombre: json['nombre'] ?? '',
       matricula: json['matricula'],
+      tipo: json['tipo'],
       accesorioId: json['accesorioId'],
       accesorioNombre: json['accesorioNombre'],
+      valores: parsedValores,
     );
   }
 
@@ -195,8 +213,10 @@ class Vehiculo {
     return {
       'nombre': nombre,
       'matricula': matricula,
+      'tipo': tipo,
       'accesorioId': accesorioId,
       'accesorioNombre': accesorioNombre,
+      'valores': valores,
     };
   }
 }

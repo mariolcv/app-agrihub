@@ -83,9 +83,19 @@ class AuthService {
 
       if (response['user'] != null) {
         return UserModel.fromJson(response['user']);
-      } else {
-        throw Exception('Respuesta inválida del servidor');
       }
+
+      if (response['data'] != null && response['data'] is Map<String, dynamic>) {
+        return UserModel.fromJson(response['data']);
+      }
+
+      if (response['email'] != null ||
+          response['username'] != null ||
+          response['name'] != null) {
+        return UserModel.fromJson(response);
+      }
+
+      throw Exception('Respuesta inválida del servidor');
     } catch (e) {
       throw Exception('Error al obtener usuario actual: $e');
     }

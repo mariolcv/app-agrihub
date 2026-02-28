@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'data.dart';
 import 'app_menu.dart';
 import 'repositories/task_repository.dart';
+import 'utils.dart';
+import 'services/auth_service.dart';
 
 // TODO: Actualizar esta pantalla para usar TaskRepository en lugar de data.tasks
 // Cargar las tareas del mes actual cuando se inicia o cambia de mes
@@ -19,17 +21,75 @@ class MyWorkingHoursPage extends StatefulWidget {
 
 class _MyWorkingHoursPageState extends State<MyWorkingHoursPage> {
   final TaskRepository _taskRepository = TaskRepository();
+  final AuthService _authService = AuthService();
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   bool _showMonthlyBreakdown = false;
   List<Task> _monthTasks = []; // Tareas del mes actual
+  Set<String> _currentUserAliases = <String>{};
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     _selectedDay = _focusedDay;
-    _loadMonthTasks(_focusedDay);
+    _initScreen();
+  }
+
+  Future<void> _initScreen() async {
+    await _loadCurrentUserAliases();
+    await _loadMonthTasks(_focusedDay);
+  }
+
+  String _normalizeName(String value) {
+    return value
+        .trim()
+        .toLowerCase()
+        .replaceAll('á', 'a')
+        .replaceAll('é', 'e')
+        .replaceAll('í', 'i')
+        .replaceAll('ó', 'o')
+        .replaceAll('ú', 'u')
+        .replaceAll('ü', 'u');
+  }
+
+  Future<void> _loadCurrentUserAliases() async {
+    final aliases = <String>{};
+
+    if (currentUser != null) {
+      aliases.add(_normalizeName(currentUser!.nombre_usuario));
+    }
+
+    try {
+      final user = await _authService.getCurrentUser();
+
+      if (user.username.isNotEmpty) {
+        aliases.add(_normalizeName(user.username));
+      }
+      if (user.empleado?.nombre.isNotEmpty == true) {
+        aliases.add(_normalizeName(user.empleado!.nombre));
+      }
+    } catch (_) {
+      // Continuar con aliases locales si falla /me
+    }
+
+    setState(() {
+      _currentUserAliases = aliases;
+    });
+  }
+
+  bool _isHoursRecordForCurrentUser(HorasEmpleado record) {
+    if (_currentUserAliases.isEmpty) return false;
+
+    final empleadoNombre = _normalizeName(record.empleado.nombre);
+    if (_currentUserAliases.contains(empleadoNombre)) return true;
+
+    final username = record.empleado.usuario?.nombre_usuario;
+    if (username != null && username.trim().isNotEmpty) {
+      if (_currentUserAliases.contains(_normalizeName(username))) return true;
+    }
+
+    return false;
   }
 
   /// Carga las tareas del mes desde el backend
@@ -45,11 +105,7 @@ class _MyWorkingHoursPageState extends State<MyWorkingHoursPage> {
       
       print('📅 Cargando tareas del mes ${DateFormat('MM/yyyy').format(month)}');
       
-      // ⚠️ TEMPORAL: Usa lista básica sin gastos hasta que exista endpoint
-      //    GET /api/empleados/[id]/horas-trabajadas?fecha_desde=X&fecha_hasta=Y
-      // TODO: Cuando exista el endpoint, reemplazar por:
-      //    final horasData = await _empleadoRepository.getHorasTrabajadas(empleadoId, firstDay, lastDay);
-      final tasks = await _taskRepository.getTasksForDateRange(firstDay, lastDay);
+      final tasks = await _taskRepository.getTasksForDateRangeWithDetails(firstDay, lastDay);
       
       setState(() {
         _monthTasks = tasks;
@@ -57,25 +113,31 @@ class _MyWorkingHoursPageState extends State<MyWorkingHoursPage> {
       });
       
       print('✅ Tareas cargadas: ${tasks.length}');
-      print('⚠️ Nota: Estas tareas NO tienen gastos_empleados (datos básicos solamente)');
-      print('   Las horas trabajadas mostrarán 0 hasta que exista el endpoint de horas');
+      final totalRegistrosHoras = tasks.fold<int>(0, (sum, t) => sum + t.empleados.length);
+      print('✅ Registros de horas cargados: $totalRegistrosHoras');
     } catch (e) {
       print('❌ Error al cargar tareas del mes: $e');
       setState(() {
         _isLoading = false;
       });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error cargando horas trabajadas: $e')),
+        );
+      }
     }
   }
 
   int _hoursForDay(DateTime day) {
-    if (currentUser == null) return 0;
+    if (_currentUserAliases.isEmpty) return 0;
     
     final key = DateTime(day.year, day.month, day.day);
     int total = 0;
     
     for (var t in _monthTasks) {
       for (var he in t.empleados) {
-        if (he.empleado.usuario?.nombre_usuario == currentUser!.nombre_usuario) {
+        if (_isHoursRecordForCurrentUser(he)) {
           final d = DateTime(he.fecha.year, he.fecha.month, he.fecha.day);
           if (d == key) total += he.horas;
         }
@@ -87,28 +149,27 @@ class _MyWorkingHoursPageState extends State<MyWorkingHoursPage> {
 
   Map<String, int> _hoursPerTaskForDay(DateTime day) {
     final Map<String, int> m = {};
-    if (currentUser == null) return m;
+    if (_currentUserAliases.isEmpty) return m;
     final key = DateTime(day.year, day.month, day.day);
     for (var t in _monthTasks) {
       int sum = 0;
       for (var he in t.empleados) {
-        if (he.empleado.usuario?.nombre_usuario == currentUser!.nombre_usuario) {
+        if (_isHoursRecordForCurrentUser(he)) {
           final d = DateTime(he.fecha.year, he.fecha.month, he.fecha.day);
           if (d == key) sum += he.horas;
         }
       }
-      // prefer task.type (tipo) over fieldName for the label
-      if (sum > 0) m[t.type ?? t.fieldName ?? 'Tarea ${t.id}'] = sum;
+      if (sum > 0) m[getTaskListTitle(t)] = sum;
     }
     return m;
   }
 
   int _hoursForMonth(DateTime month) {
-    if (currentUser == null) return 0;
+    if (_currentUserAliases.isEmpty) return 0;
     int total = 0;
     for (var t in _monthTasks) {
       for (var he in t.empleados) {
-        if (he.empleado.usuario?.nombre_usuario == currentUser!.nombre_usuario) {
+        if (_isHoursRecordForCurrentUser(he)) {
           if (he.fecha.year == month.year && he.fecha.month == month.month) total += he.horas;
         }
       }
@@ -119,13 +180,13 @@ class _MyWorkingHoursPageState extends State<MyWorkingHoursPage> {
   // Build grouped breakdown: Map<DateTime, List<MapEntry(taskName,hours)>>
   Map<DateTime, List<MapEntry<String,int>>> _monthlyBreakdown(DateTime month) {
     final Map<DateTime, List<MapEntry<String,int>>> m = {};
-    if (currentUser == null) return m;
+    if (_currentUserAliases.isEmpty) return m;
     for (var t in _monthTasks) {
       for (var he in t.empleados) {
-        if (he.empleado.usuario?.nombre_usuario == currentUser!.nombre_usuario) {
+        if (_isHoursRecordForCurrentUser(he)) {
           if (he.fecha.year == month.year && he.fecha.month == month.month) {
             final d = DateTime(he.fecha.year, he.fecha.month, he.fecha.day);
-            final name = t.type ?? 'Tarea ${t.id}';
+            final name = getTaskListTitle(t);
             m.putIfAbsent(d, () => []).add(MapEntry(name, he.horas));
           }
         }
@@ -136,11 +197,69 @@ class _MyWorkingHoursPageState extends State<MyWorkingHoursPage> {
     return sorted;
   }
 
-  Color _colorForDay(DateTime day) {
+  int _maxHoursForMonth(DateTime month) {
+    if (_currentUserAliases.isEmpty) return 0;
+
+    final Map<DateTime, int> byDay = {};
+    for (var t in _monthTasks) {
+      for (var he in t.empleados) {
+        if (_isHoursRecordForCurrentUser(he) &&
+            he.fecha.year == month.year &&
+            he.fecha.month == month.month) {
+          final key = DateTime(he.fecha.year, he.fecha.month, he.fecha.day);
+          byDay[key] = (byDay[key] ?? 0) + he.horas;
+        }
+      }
+    }
+
+    if (byDay.isEmpty) return 0;
+    return byDay.values.reduce((a, b) => a > b ? a : b);
+  }
+
+  Color? _heatmapColorForDay(DateTime day, int maxHoursInMonth) {
     final int hours = _hoursForDay(day);
-    if (hours == 0) return Colors.grey;
-    if (hours < 8) return Colors.yellow;
-    return Colors.green;
+    if (hours <= 0) return null;
+
+    if (maxHoursInMonth <= 0) {
+      return Colors.yellow.shade600;
+    }
+
+    final ratio = (hours / maxHoursInMonth).clamp(0.0, 1.0);
+    return Color.lerp(Colors.yellow.shade600, Colors.green.shade600, ratio);
+  }
+
+  Color _dayTextColor(Color fillColor, {required bool isSunday}) {
+    if (isSunday) return Colors.red;
+    return fillColor.computeLuminance() < 0.5 ? Colors.white : Colors.black;
+  }
+
+  Widget _buildHeatmapLegend(int maxHoursInMonth) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Leyenda (mapa de calor)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 4),
+        const Text('Sin color = 0 h', style: TextStyle(fontSize: 12, color: Colors.black54)),
+        const SizedBox(height: 6),
+        Container(
+          height: 10,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(999),
+            gradient: LinearGradient(
+              colors: [Colors.yellow.shade600, Colors.green.shade600],
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text('> 0 h', style: TextStyle(fontSize: 12)),
+            Text('Máximo: $maxHoursInMonth h', style: const TextStyle(fontSize: 12)),
+          ],
+        ),
+      ],
+    );
   }
 
   @override
@@ -148,6 +267,7 @@ class _MyWorkingHoursPageState extends State<MyWorkingHoursPage> {
   final monthLabelRaw = DateFormat('MMMM', 'es').format(_focusedDay);
   final monthLabel = monthLabelRaw.isNotEmpty ? monthLabelRaw[0].toUpperCase() + monthLabelRaw.substring(1) : monthLabelRaw;
     final monthTotal = _hoursForMonth(_focusedDay);
+    final maxHoursInMonth = _maxHoursForMonth(_focusedDay);
     final selected = _selectedDay ?? _focusedDay;
     final dayDetail = _hoursPerTaskForDay(selected);
     final breakdown = _monthlyBreakdown(_focusedDay);
@@ -188,6 +308,8 @@ class _MyWorkingHoursPageState extends State<MyWorkingHoursPage> {
                     child: Text('Total en $monthLabel: $monthTotal h', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   ),
                 ),
+                const SizedBox(height: 8),
+                _buildHeatmapLegend(maxHoursInMonth),
                 const SizedBox(height: 12),
 
                 // Calendar
@@ -221,19 +343,20 @@ class _MyWorkingHoursPageState extends State<MyWorkingHoursPage> {
                   },
                   calendarBuilders: CalendarBuilders(
                     defaultBuilder: (context, day, focusedDay) {
-                      final color = _colorForDay(day);
-                      final textColor = day.weekday == DateTime.sunday ? Colors.red : null;
-                      // If no hours (grey), don't draw the grey circle; show only the number
-                      if (color == Colors.grey) {
+                      final fillColor = _heatmapColorForDay(day, maxHoursInMonth);
+                      if (fillColor == null) {
+                        final textColor = day.weekday == DateTime.sunday ? Colors.red : null;
                         return Center(child: Text('${day.day}', style: TextStyle(color: textColor)));
                       }
+
+                      final textColor = _dayTextColor(fillColor, isSunday: day.weekday == DateTime.sunday);
                       return Center(
                         child: Container(
                           margin: const EdgeInsets.all(6.0),
                           width: 36,
                           height: 36,
                           decoration: BoxDecoration(
-                            color: color,
+                            color: fillColor,
                             shape: BoxShape.circle,
                           ),
                           child: Center(child: Text('${day.day}', style: TextStyle(color: textColor))),
@@ -241,19 +364,20 @@ class _MyWorkingHoursPageState extends State<MyWorkingHoursPage> {
                       );
                     },
                     todayBuilder: (context, day, focusedDay) {
-                      final color = _colorForDay(day);
-                      final textColor = day.weekday == DateTime.sunday ? Colors.red : Colors.black;
-                      // If no hours (grey), show only the number (no grey circle)
-                      if (color == Colors.grey) {
+                      final fillColor = _heatmapColorForDay(day, maxHoursInMonth);
+                      if (fillColor == null) {
+                        final textColor = day.weekday == DateTime.sunday ? Colors.red : Colors.black;
                         return Center(child: Text('${day.day}', style: TextStyle(color: textColor)));
                       }
+
+                      final textColor = _dayTextColor(fillColor, isSunday: day.weekday == DateTime.sunday);
                       return Center(
                         child: Container(
                           margin: const EdgeInsets.all(4.0),
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: color,
+                            color: fillColor,
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.black),
                           ),
@@ -262,18 +386,20 @@ class _MyWorkingHoursPageState extends State<MyWorkingHoursPage> {
                       );
                     },
                     selectedBuilder: (context, day, focusedDay) {
-                      final color = _colorForDay(day);
-                      final textColor = day.weekday == DateTime.sunday ? Colors.red : Colors.black;
-                      if (color == Colors.grey) {
+                      final fillColor = _heatmapColorForDay(day, maxHoursInMonth);
+                      if (fillColor == null) {
+                        final textColor = day.weekday == DateTime.sunday ? Colors.red : Colors.black;
                         return Center(child: Text('${day.day}', style: TextStyle(color: textColor)));
                       }
+
+                      final textColor = _dayTextColor(fillColor, isSunday: day.weekday == DateTime.sunday);
                       return Center(
                         child: Container(
                           margin: const EdgeInsets.all(4.0),
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: color,
+                            color: fillColor,
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.black),
                           ),

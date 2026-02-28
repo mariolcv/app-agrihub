@@ -32,12 +32,19 @@ class TareaModel {
   });
 
   factory TareaModel.fromJson(Map<String, dynamic> json) {
+    DateTime parseDate(dynamic value) {
+      if (value is String && value.isNotEmpty) {
+        return DateTime.parse(value);
+      }
+      return DateTime.fromMillisecondsSinceEpoch(0);
+    }
+
     return TareaModel(
       id: json['id'],
       tipoTarea: json['tipo_tarea'] ?? json['tipo'] ?? '',
       nombre: json['nombre'],
-      fechaInicio: DateTime.parse(json['fecha_inicio']),
-      fechaFinal: DateTime.parse(json['fecha_final']),
+      fechaInicio: parseDate(json['fecha_inicio']),
+      fechaFinal: parseDate(json['fecha_final']),
       responsable: json['responsable'],
       idEmpleadoResponsable: json['id_empleado_responsable'],
       completada: json['completada'] ?? false,
@@ -126,14 +133,18 @@ class GastoEmpleadoTarea {
     if (json['valores'] != null) {
       valoresMap = {};
       (json['valores'] as Map).forEach((key, value) {
-        valoresMap![key.toString()] = (value ?? 0).toDouble();
+        if (value is num) {
+          valoresMap![key.toString()] = value.toDouble();
+        } else {
+          valoresMap![key.toString()] = double.tryParse(value?.toString() ?? '0') ?? 0;
+        }
       });
     }
 
     return GastoEmpleadoTarea(
       id: json['id'],
-      idEmpleado: json['id_empleado'],
-      nombreEmpleado: json['nombre_empleado'],
+      idEmpleado: json['id_empleado'] ?? json['id'] ?? 0,
+      nombreEmpleado: json['nombre_empleado'] ?? json['nombre'],
       valores: valoresMap,
     );
   }
@@ -151,6 +162,7 @@ class GastoVehiculoTarea {
   final int? id;
   final String matricula;
   final String? nombreVehiculo;
+  final String? tipoVehiculo;
   final int? idAccesorio;
   final String? nombreAccesorio;
   final Map<String, dynamic>? valores;
@@ -159,18 +171,45 @@ class GastoVehiculoTarea {
     this.id,
     required this.matricula,
     this.nombreVehiculo,
+    this.tipoVehiculo,
     this.idAccesorio,
     this.nombreAccesorio,
     this.valores,
   });
 
   factory GastoVehiculoTarea.fromJson(Map<String, dynamic> json) {
+    final accesorio = json['accesorio'];
+    final vehiculo = json['vehiculo'];
+
+    String resolveMatricula() {
+      final raw = json['matricula'] ??
+          json['vehiculo_matricula'] ??
+          json['matricula_vehiculo'] ??
+          (vehiculo is Map ? vehiculo['matricula'] : null);
+      return (raw ?? '').toString();
+    }
+
+    String? resolveNombre() {
+      final raw = json['nombre_vehiculo'] ??
+          json['nombre'] ??
+          (vehiculo is Map ? vehiculo['nombre'] : null);
+      return raw?.toString();
+    }
+
+    String? resolveTipo() {
+      final raw = json['tipo'] ??
+          json['tipo_vehiculo'] ??
+          (vehiculo is Map ? vehiculo['tipo'] : null);
+      return raw?.toString();
+    }
+
     return GastoVehiculoTarea(
       id: json['id'],
-      matricula: json['matricula'],
-      nombreVehiculo: json['nombre_vehiculo'],
-      idAccesorio: json['id_accesorio'],
-      nombreAccesorio: json['nombre_accesorio'],
+      matricula: resolveMatricula(),
+      nombreVehiculo: resolveNombre(),
+      tipoVehiculo: resolveTipo(),
+      idAccesorio: json['id_accesorio'] ?? (accesorio is Map ? accesorio['id'] : null),
+      nombreAccesorio: json['nombre_accesorio'] ?? (accesorio is Map ? accesorio['nombre'] : null),
       valores: json['valores'] as Map<String, dynamic>?,
     );
   }
@@ -203,14 +242,18 @@ class GastoRecursoTarea {
     if (json['valores'] != null) {
       valoresMap = {};
       (json['valores'] as Map).forEach((key, value) {
-        valoresMap![key.toString()] = (value ?? 0).toDouble();
+        if (value is num) {
+          valoresMap![key.toString()] = value.toDouble();
+        } else {
+          valoresMap![key.toString()] = double.tryParse(value?.toString() ?? '0') ?? 0;
+        }
       });
     }
 
     return GastoRecursoTarea(
       id: json['id'],
-      idRecurso: json['id_recurso'],
-      nombreRecurso: json['nombre_recurso'],
+      idRecurso: json['id_recurso'] ?? json['id'] ?? 0,
+      nombreRecurso: json['nombre_recurso'] ?? json['nombre'],
       valores: valoresMap,
     );
   }

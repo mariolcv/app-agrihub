@@ -1,6 +1,8 @@
 class ApiConfig {
   // Base URL de la API
-  static const String baseUrl = 'http://localhost:3000';
+  // static const String baseUrl = 'http://localhost:3000';
+  static const String baseUrl = 'https://legendary-tribble-pjjj6rpxrg62v5j-3000.app.github.dev';
+  
   
   // Endpoints de autenticación
   static const String loginEndpoint = '/api/auth/login';

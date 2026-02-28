@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'data.dart';
 
 
 
@@ -55,4 +56,17 @@ String getStringDate(DateTime fechaSeleccionada) {
 
 String tituloTareas(DateTime diaSeleccionado) {
   return "Tareas del ${DateFormat('d MMMM', 'es_ES').format(diaSeleccionado)}";
+}
+
+String getTaskListTitle(Task task) {
+  final finca = (task.fieldName != null && task.fieldName!.trim().isNotEmpty)
+      ? task.fieldName!.trim()
+      : 'Sin parcela';
+  final nombreOTipo = (task.nombre != null && task.nombre!.trim().isNotEmpty)
+      ? task.nombre!.trim()
+      : ((task.type != null && task.type!.trim().isNotEmpty)
+          ? task.type!.trim()
+          : 'Sin tipo');
+
+  return '$finca: $nombreOTipo';
 }

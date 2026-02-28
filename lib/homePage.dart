@@ -38,7 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
     try {
-      final tasks = await _taskRepository.getTasksForDay(selectedDate);
+      final tasks = await _taskRepository.getTasksForDay(selectedDate, forceRefresh: true);
       setState(() {
         _tasks = tasks;
         _isLoading = false;
@@ -150,7 +150,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _buildTaskItem(Task task) {
-    String titulo = '${task.fieldName ?? "Sin parcela"}: ${task.type ?? "Sin tipo"}';
+    String titulo = getTaskListTitle(task);
     String subtitulo = 'Responsable: ${task.officer ?? "Sin asignar"}';
     return Padding(
       key: ValueKey(task.id),
@@ -191,10 +191,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () => _deleteTask(task),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.arrow_forward_ios),
-                  onPressed: () => _viewTask(task),
                 ),
               ],
             ),
