@@ -1,7 +1,7 @@
 class ApiConfig {
   // Base URL de la API
   // static const String baseUrl = 'http://localhost:3000';
-  static const String baseUrl = 'https://legendary-tribble-pjjj6rpxrg62v5j-3000.app.github.dev';
+  static const String baseUrl = 'https://agrihub-git-main-marios-projects-ca54187a.vercel.app';
   
   
   // Endpoints de autenticación
