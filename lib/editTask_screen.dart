@@ -8,8 +8,12 @@ import 'repositories/accesorio_repository.dart';
 import 'repositories/parcela_repository.dart';
 import 'repositories/task_repository.dart';
 import 'services/tarea_service.dart';
+import 'services/app_logger.dart';
 import 'models/parcela_model.dart';
 import 'models/vehiculo_model.dart';
+
+void print(Object? message) => AppLogger.i(message);
+void debugPrint(String? message, {int? wrapWidth}) => AppLogger.d(message);
 
 class EditarTareaPage extends StatefulWidget {
   final Task? task;
@@ -431,7 +435,7 @@ class _EditarTareaPageState extends State<EditarTareaPage> {
       children: [
         Text(titulo, style: const TextStyle(fontWeight: FontWeight.bold)),
         DropdownButtonFormField<String>(
-          value: opciones.contains(valorSeleccionado) ? valorSeleccionado : null,
+          initialValue: opciones.contains(valorSeleccionado) ? valorSeleccionado : null,
           items: opciones
               .map((opcion) => DropdownMenuItem(value: opcion, child: Text(opcion)))
               .toList(),
@@ -1048,7 +1052,7 @@ class _EditarTareaPageState extends State<EditarTareaPage> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               DropdownButtonFormField<String>(
-                                value: item.accesorioNombre,
+                                initialValue: item.accesorioNombre,
                                 items: [
                                   const DropdownMenuItem(value: null, child: Text('Sin accesorio')),
                                   ...accesoriosVehiculo.map((acc) => 
@@ -1534,7 +1538,7 @@ class _EditarTareaPageState extends State<EditarTareaPage> {
                   print('Parcelas seleccionadas: ${_selectedParcelas.length}');
                   final List<int> allParcelaIds = _selectedParcelas
                       .where((p) => p.id != null)
-                      .map((p) => p.id!)
+                      .map((p) => p.id)
                       .toList();
                   print('✅ IDs de parcelas válidos: $allParcelaIds');
                   
@@ -1724,11 +1728,6 @@ class _EditarTareaPageState extends State<EditarTareaPage> {
                         'cargo': entry.value['cargo'],
                         'valores': entry.value['valores'],
                       };
-                      
-                      // Validar que ningún campo sea null
-                      if (entry.key == null) {
-                        print('        ❌ ERROR: ID es null');
-                      }
                       if (entry.value['cargo'] == null) {
                         print('        ❌ ERROR: cargo es null');
                       }
@@ -2101,7 +2100,7 @@ class _ParcelaSelectionModalState extends State<_ParcelaSelectionModal> {
                           const Text('Finca *', style: TextStyle(fontWeight: FontWeight.bold)),
                           const SizedBox(height: 8),
                           DropdownButtonFormField<String>(
-                            value: _selectedFinca,
+                            initialValue: _selectedFinca,
                             decoration: InputDecoration(
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -2141,7 +2140,7 @@ class _ParcelaSelectionModalState extends State<_ParcelaSelectionModal> {
                           const Text('Variedad', style: TextStyle(fontWeight: FontWeight.bold)),
                           const SizedBox(height: 8),
                           DropdownButtonFormField<String>(
-                            value: _selectedVariedad,
+                            initialValue: _selectedVariedad,
                             decoration: InputDecoration(
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -2181,7 +2180,7 @@ class _ParcelaSelectionModalState extends State<_ParcelaSelectionModal> {
                           const Text('Paraje', style: TextStyle(fontWeight: FontWeight.bold)),
                           const SizedBox(height: 8),
                           DropdownButtonFormField<String>(
-                            value: _selectedParaje,
+                            initialValue: _selectedParaje,
                             decoration: InputDecoration(
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -2219,7 +2218,7 @@ class _ParcelaSelectionModalState extends State<_ParcelaSelectionModal> {
                           const Text('Año de Plantación', style: TextStyle(fontWeight: FontWeight.bold)),
                           const SizedBox(height: 8),
                           DropdownButtonFormField<String>(
-                            value: _selectedAnoPlantacion,
+                            initialValue: _selectedAnoPlantacion,
                             decoration: InputDecoration(
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

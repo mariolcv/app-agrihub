@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'editTask_screen.dart';
 import 'data.dart';
+import 'repositories/task_repository.dart';
 
 class MostrarTareaPage extends StatelessWidget {
   final Task tarea;
+  final TaskRepository _taskRepository = TaskRepository();
 
-  const MostrarTareaPage({super.key, required this.tarea});
+  MostrarTareaPage({super.key, required this.tarea});
 
   Widget buildCampo(String titulo, String contenido) {
     return Column(
@@ -174,11 +176,33 @@ class MostrarTareaPage extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
-            onPressed: () {
-              Navigator.push(
+            onPressed: () async {
+              final updatedTask = await Navigator.push<Task>(
                 context,
                 MaterialPageRoute(
                   builder: (context) => EditarTareaPage(task: tarea),
+                ),
+              );
+
+              if (!context.mounted || updatedTask == null) {
+                return;
+              }
+
+              Task taskToShow = updatedTask;
+              try {
+                taskToShow = await _taskRepository.getTaskById(updatedTask.id);
+              } catch (_) {
+                // If refresh fails, still show the edited task returned by the form.
+              }
+
+              if (!context.mounted) {
+                return;
+              }
+
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MostrarTareaPage(tarea: taskToShow),
                 ),
               );
             },

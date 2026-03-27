@@ -1,6 +1,9 @@
 import '../config/api_config.dart';
 import '../models/tarea_model.dart';
 import 'api_service.dart';
+import 'app_logger.dart';
+
+void print(Object? message) => AppLogger.i(message);
 
 class TareaService {
   final ApiService _apiService = ApiService();

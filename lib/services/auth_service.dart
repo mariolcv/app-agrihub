@@ -7,11 +7,33 @@ class AuthService {
   final ApiService _apiService = ApiService();
   static final _logger = Logger();
 
+  UserModel _parseLoginResponse(Map<String, dynamic> response) {
+    if (response['user'] != null) {
+      _logger.d('Formato detectado: anidado en user');
+      return UserModel.fromJson(response['user']);
+    }
+
+    if (response['email'] != null ||
+        response['username'] != null ||
+        response['name'] != null) {
+      _logger.d('Formato detectado: respuesta directa');
+      return UserModel.fromJson(response);
+    }
+
+    _logger.e('Formato de respuesta no reconocido');
+    throw Exception(
+      'Respuesta inválida del servidor. Datos recibidos: ${response.keys.join(", ")}',
+    );
+  }
+
   // Login
   Future<UserModel> login(String email, String password) async {
     try {
       _logger.i('Intentando login para: $email');
       _logger.d('Endpoint: ${ApiConfig.baseUrl}${ApiConfig.loginEndpoint}');
+
+      // Evita enviar sesión previa inválida en el flujo de login.
+      await _apiService.clearTokens();
       
       final response = await _apiService.post(
         ApiConfig.loginEndpoint,
@@ -25,19 +47,36 @@ class AuthService {
       _logger.i('Login response recibida');
       _logger.d('Response keys: ${response.keys.join(", ")}');
 
-      // Intentar con formato {user: {...}} o directo {...}
-      if (response['user'] != null) {
-        _logger.d('Formato detectado: anidado en user');
-        return UserModel.fromJson(response['user']);
-      } else if (response['email'] != null || response['username'] != null || response['name'] != null) {
-        _logger.d('Formato detectado: respuesta directa');
-        // Respuesta directa sin anidación
-        return UserModel.fromJson(response);
-      } else {
-        _logger.e('Formato de respuesta no reconocido');
-        throw Exception('Respuesta inválida del servidor. Datos recibidos: ${response.keys.join(", ")}');
-      }
+      return _parseLoginResponse(response);
     } catch (e) {
+      final message = e.toString();
+      final isUnauthorized = message.contains('No autorizado') ||
+          message.contains('401') ||
+          message.toLowerCase().contains('unauthorized');
+
+      if (isUnauthorized) {
+        // Compatibilidad con backends que reciben username en lugar de email.
+        try {
+          final fallbackResponse = await _apiService.post(
+            ApiConfig.loginEndpoint,
+            body: {
+              'username': email,
+              'password': password,
+            },
+            requiresAuth: false,
+          );
+
+          _logger.i('Login fallback con username exitoso');
+          _logger.d('Response keys: ${fallbackResponse.keys.join(", ")}');
+          return _parseLoginResponse(fallbackResponse);
+        } catch (fallbackError) {
+          _logger.e('Login fallback con username también falló', error: fallbackError);
+          throw Exception(
+            'No autorizado: revisa usuario/email y contraseña, o activa la cuenta en producción.',
+          );
+        }
+      }
+
       _logger.e('Error en login', error: e);
       throw Exception('Error al iniciar sesión: $e');
     }

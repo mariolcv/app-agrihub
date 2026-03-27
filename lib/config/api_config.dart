@@ -1,7 +1,7 @@
 class ApiConfig {
   // Base URL de la API
   // static const String baseUrl = 'http://localhost:3000';
-  static const String baseUrl = 'https://agrihub-git-main-marios-projects-ca54187a.vercel.app';
+  static const String baseUrl = 'https://agrihub-three.vercel.app';
   
   
   // Endpoints de autenticación

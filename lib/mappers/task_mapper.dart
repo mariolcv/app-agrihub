@@ -1,6 +1,9 @@
 import '../models/tarea_model.dart';
 import '../data.dart';
 import 'package:flutter/material.dart';
+import '../services/app_logger.dart';
+
+void print(Object? message) => AppLogger.i(message);
 
 /// Mapper para convertir entre TareaModel (API) y Task (UI local)
 /// Implementa el patrón Mapper para separar la capa de datos de la capa de presentación

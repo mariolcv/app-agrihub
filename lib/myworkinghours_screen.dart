@@ -7,6 +7,9 @@ import 'app_menu.dart';
 import 'repositories/task_repository.dart';
 import 'utils.dart';
 import 'services/auth_service.dart';
+import 'services/app_logger.dart';
+
+void print(Object? message) => AppLogger.i(message);
 
 // TODO: Actualizar esta pantalla para usar TaskRepository en lugar de data.tasks
 // Cargar las tareas del mes actual cuando se inicia o cambia de mes

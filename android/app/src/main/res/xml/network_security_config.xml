@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Configuración para dominios de Vercel-->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">vercel.app</domain>
+        <pin-set expiration="2026-12-31">
+            <!-- Certificados públicos de Vercel -->
+            <pin digest="SHA-256">YLh1dUR9+rDfywIUAgEYvs6d0l1HwQkWP4ZwQMC+EDc=</pin>
+            <pin digest="SHA-256">sQQj2ZVDwvWecJL06CNS5CbE09XZ7tfyc2rWA1dBjFI=</pin>
+        </pin-set>
+    </domain-config>
+
+    <!-- Permitir conexiones seguras a otros dominios -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">.</domain>
+    </domain-config>
+</network-security-config>

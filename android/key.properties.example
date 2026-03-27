@@ -1,4 +1,4 @@
-storePassword=YOUR_STORE_PASSWORD
-keyPassword=YOUR_KEY_PASSWORD
-keyAlias=upload
-storeFile=upload-keystore.jks
+storePassword=Asdf1234%
+keyPassword=Asdf1234%
+keyAlias=agrihub
+storeFile=C:/keys/agrihub-upload.jks

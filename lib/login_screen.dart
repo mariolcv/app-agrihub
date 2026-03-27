@@ -154,11 +154,13 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController pass2Controller = TextEditingController();
   final TextEditingController codeController = TextEditingController();
   final TextEditingController usernameController = TextEditingController();
+  final TextEditingController empleadoIdController = TextEditingController();
   final AuthService _authService = AuthService();
   final EmpleadoService _empleadoService = EmpleadoService();
   
   bool _isLoading = false;
   bool _isLoadingEmpleados = true;
+  bool _empleadosRequiresAuth = false;
   List<EmpleadoModel> _empleados = [];
   EmpleadoModel? _selectedEmpleado;
   String? _errorMessage;
@@ -174,19 +176,36 @@ class _RegisterPageState extends State<RegisterPage> {
       final empleados = await _empleadoService.getAllEmpleados();
       setState(() {
         _empleados = empleados;
+        _empleadosRequiresAuth = false;
         _isLoadingEmpleados = false;
       });
     } catch (e) {
+      final message = e.toString().toLowerCase();
+      final unauthorized = message.contains('no autorizado') ||
+          message.contains('unauthorized') ||
+          message.contains('401');
+
       setState(() {
-        _errorMessage = 'Error al cargar empleados: $e';
+        if (unauthorized) {
+          _empleadosRequiresAuth = true;
+          _errorMessage =
+              'No se pudo cargar la lista de empleados sin sesión. Introduce manualmente tu ID de empleado para registrarte.';
+        } else {
+          _errorMessage = 'Error al cargar empleados: $e';
+        }
         _isLoadingEmpleados = false;
       });
     }
   }
 
   void _onRegister() async {
-    if (_selectedEmpleado == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Por favor selecciona tu nombre')));
+    final int? empleadoId = _selectedEmpleado?.id ?? int.tryParse(empleadoIdController.text.trim());
+
+    if (empleadoId == null) {
+      final msg = _empleadosRequiresAuth
+          ? 'Introduce tu ID de empleado para continuar'
+          : 'Por favor selecciona tu nombre';
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
       return;
     }
 
@@ -215,7 +234,7 @@ class _RegisterPageState extends State<RegisterPage> {
         email: emailController.text.trim(),
         password: passController.text,
         confirmPassword: pass2Controller.text,
-        empleadoId: _selectedEmpleado!.id,
+        empleadoId: empleadoId,
         oneTimePassword: codeController.text.trim(),
       );
 
@@ -255,6 +274,17 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   @override
+  void dispose() {
+    emailController.dispose();
+    passController.dispose();
+    pass2Controller.dispose();
+    codeController.dispose();
+    usernameController.dispose();
+    empleadoIdController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -291,9 +321,9 @@ class _RegisterPageState extends State<RegisterPage> {
             // Dropdown de empleados
             if (_isLoadingEmpleados)
               const CircularProgressIndicator()
-            else
+            else if (_empleados.isNotEmpty)
               DropdownButtonFormField<EmpleadoModel>(
-                value: _selectedEmpleado,
+                initialValue: _selectedEmpleado,
                 decoration: const InputDecoration(
                   labelText: 'Selecciona tu nombre',
                   border: OutlineInputBorder(),
@@ -311,6 +341,20 @@ class _RegisterPageState extends State<RegisterPage> {
                   });
                 },
               ),
+
+            if (_empleadosRequiresAuth || _empleados.isEmpty) ...[
+              const SizedBox(height: 12),
+              TextField(
+                controller: empleadoIdController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'ID de empleado',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.badge_outlined),
+                  hintText: 'Ejemplo: 12',
+                ),
+              ),
+            ],
             
             const SizedBox(height: 12),
             

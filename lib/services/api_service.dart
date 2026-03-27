@@ -4,6 +4,9 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logger/logger.dart';
 import '../config/api_config.dart';
+import 'app_logger.dart';
+
+void print(Object? message) => AppLogger.i(message);
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();
@@ -159,6 +162,9 @@ class ApiService {
     } on http.ClientException catch (e) {
       throw Exception('Error de conexión: ${e.message}.\nVerifica que el servidor esté corriendo en ${ApiConfig.baseUrl}');
     } catch (e, stackTrace) {
+      if (e is Exception) {
+        rethrow;
+      }
       print('❌ [ApiService] POST Error:');
       print('   Error: $e');
       print('   Type: ${e.runtimeType}');

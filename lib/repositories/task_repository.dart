@@ -1,6 +1,9 @@
 import '../data.dart';
 import '../services/tarea_service.dart';
+import '../services/app_logger.dart';
 import '../mappers/task_mapper.dart';
+
+void print(Object? message) => AppLogger.i(message);
 
 /// Repository para gestión de tareas
 /// Implementa el patrón Repository y Singleton para centralizar el acceso a datos
